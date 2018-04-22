@@ -7,7 +7,7 @@
     "doc": "doc"
   },
   "dependencies": {
-    "bulma": "^0.6.2",
+    "bulma": "^0.7.0",
     "del": "^3.0.0"
   },
   "devDependencies": {
