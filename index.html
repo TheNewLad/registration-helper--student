@@ -21,7 +21,68 @@
             <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience and security.</p>
         <![endif]-->
 
-        <!-- @TODO place code here -->
+        <nav class="navbar is-info">
+            <div class="navbar-brand">
+                <a class="navbar-item">
+                    <span class="icon">
+                        <i class="fas fa-graduation-cap"></i>
+                    </span>
+                    <p>Registration Helper</p>
+                </a>
+            </div>
+        </nav>
+        <section class="section">
+            <div class="columns">
+                <div class="column is-one-third curriculum">
+                    <div class="semester-form">
+                        <div class="field">
+                            <label class="label">Semester Year</label>
+                            <div class="control">
+                                <div class="select">
+                                    <select name="" id="semesterYear">
+                                        <option value="2017">2017</option>
+                                        <option value="2018">2018</option>
+                                        <option value="2019">2019</option>
+                                        <option value="2020">2020</option>
+                                        <option value="2021">2021</option>
+                                        <option value="2022">2022</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label class="radio">
+                                <input type="radio" name="term">
+                                Fall
+                            </label>
+                            <label class="radio">
+                                <input type="radio" name="term">
+                                Spring
+                            </label>
+                        </div>
+                    </div>
+                    <div class="class-picker">
+                        <div class="box">
+                            <div class="columns is-multiline">
+                                <div class="column is-12 class-group">
+                                    <button class="button button--class class-group__title">CS GUR</button>
+                                    <div class="columns is-multiline class-container">
+                                        <div class="column column--button is-12">
+                                            <button class="button button--class is-outlined is-link">CS 100</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="column planning">
+                    plan
+                </div>
+            </div>
+        </section>
+
 
         <script src="dist/js/app.js"></script>
 

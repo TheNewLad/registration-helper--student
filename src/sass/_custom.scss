@@ -2,4 +2,19 @@
    Author's custom styles
    ========================================================================== */
 
+.button--class {
+    width: 100%;
+}
 
+.class-container {
+    margin-top: 0.1rem;
+    max-height: 150px;
+    overflow: hidden;
+    overflow-y: scroll;
+    .column--button:not(:first-child) {
+        padding-top: 0.1rem;
+    }
+    .column--button {
+        padding-bottom: 0.1rem;
+    }
+}
