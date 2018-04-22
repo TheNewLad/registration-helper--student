@@ -4,6 +4,7 @@
 // global variables
 const APP_ROOT = 'http://clubs.njit.edu/capstone/RegistrationHelper';
 let allClassesStudent;
+const classSet = new Set();
 
 // @TODO Remove Hardcoded parameters
 let ucid = 'mgt23';
@@ -30,14 +31,84 @@ function getAllClassesStudent(ucid, major) {
 // Sets class data after data fetch
 function setAllClassesStudent(data) {
     allClassesStudent = data;
+    return Promise.resolve(data);
 }
 
+// Creates class set from class student data
+function createClassSet(data) {
+    for (let cls of data) {
+        classSet.add(cls.class);
+    }
+    return Promise.resolve(data);
+}
+
+/*Helper functions*/
+
 /*
-*  Helper functions
+* Checks class completeness
+* returns:
+*   0: prerequisites incomplete; cannot take course
+*   1: prerequisites partially complete; cannot take course
+*   2: prerequisites complete but course not; can take course
+*   3: course taken
 */
+function isCompleted(classObj) {
+    const prereqs = classObj.prereqs;
+    if (isTaken(classObj)) {
+        return 3;
+    } else if (prereqs === undefined
+        || prereqs.length === 0) {
+        return 2;
+    } else {
+        if (isPrerequisiteComplete(prereqs)) {
+            return 2;
+        } else if (isPrerequisitePartiallyComplete(prereqs)) {
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+// Check class prerequisites for completion
+function isPrerequisiteComplete(prereqArray) {
+    return prereqArray.every(isPrerequisiteGroupComplete);
+}
+
+// Check class prerequisites for partial completion
+function isPrerequisitePartiallyComplete(prereqArray) {
+    return prereqArray.some(isPrerequisiteGroupComplete);
+}
+
+
+// Check prerequisite group for completion
+function isPrerequisiteGroupComplete(logicGroup) {
+    const logic = logicGroup.logic;
+    const course = logicGroup.course;
+    let complete = false;
+
+    switch (logic) {
+    case 'OR':
+        complete = course.some(isTaken);
+        break;
+    case 'AND':
+        complete = course.every(isTaken);
+        break;
+    }
+
+    return complete;
+}
+
+// Class Exist
+function isClass(className) {
+    return classSet.has(className);
+}
 
 // Find class from array of classes
 function findClass(className) {
+    if (!isClass(className)) {
+        throw new Error(`Could not find class: ${className}`);
+    }
     for (let classObj of allClassesStudent) {
         if (classObj.class === className) {
             return classObj;
@@ -101,5 +172,6 @@ function getTermLetter(termName) {
 // Loads app after page load
 (function loadApp(){
     getAllClassesStudent(ucid, studentMajor)
-        .then(setAllClassesStudent);
+        .then(setAllClassesStudent)
+        .then(createClassSet);
 })();
