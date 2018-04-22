@@ -36,6 +36,20 @@ function setAllClassesStudent(data) {
 *  Helper functions
 */
 
+// Find class from array of classes
+function findClass(className) {
+    for (let classObj of allClassesStudent) {
+        if (classObj.class === className) {
+            return classObj;
+        }
+    }
+    return -1;
+}
+
+// Checks if class is taken
+function isTaken(classObj) {
+    return classObj.code !== null;
+}
 
 // decodes class code
 function codeDecode(code) {
