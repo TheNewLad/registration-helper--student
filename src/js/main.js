@@ -5,6 +5,7 @@
 const APP_ROOT = 'http://clubs.njit.edu/capstone/RegistrationHelper';
 let allClassesStudent;
 const classSet = new Set();
+const groupSet = new Set();
 
 // @TODO Remove Hardcoded parameters
 let ucid = 'mgt23';
@@ -42,7 +43,45 @@ function createClassSet(data) {
     return Promise.resolve(data);
 }
 
+// Creates class set from class student data
+function createGroupSet(data) {
+    for (let cls of data) {
+        groupSet.add(cls.group);
+    }
+    return Promise.resolve(data);
+}
+
 /*Helper functions*/
+
+// Searches for classes with year/term code and returns them
+function getClassesByCode(code) {
+    let classArr = [];
+    for (let cls of allClassesStudent) {
+        if (cls.code === code) {
+            classArr.push(cls);
+        }
+    }
+    return classArr;
+}
+
+// Searches for classes in a GUR group and returns them
+function getClassesByGroup(group) {
+    if (!isGroup(group)) {
+        throw new Error(`Could not find class: ${group}`);
+    }
+    let classArr = [];
+    for (let cls of allClassesStudent) {
+        if (cls.group === group) {
+            classArr.push(cls);
+        }
+    }
+    return classArr;
+}
+
+// Group Exist
+function isGroup(className) {
+    return groupSet.has(className);
+}
 
 /*
 * Checks class completeness
@@ -173,5 +212,6 @@ function getTermLetter(termName) {
 (function loadApp(){
     getAllClassesStudent(ucid, studentMajor)
         .then(setAllClassesStudent)
-        .then(createClassSet);
+        .then(createClassSet)
+        .then(createGroupSet);
 })();
