@@ -2,8 +2,14 @@
    Author's custom styles
    ========================================================================== */
 
-.button--class {
+.button--class, .button--group {
     width: 100%;
+}
+
+.class-group-container {
+    max-height: 300px;
+    overflow: hidden;
+    overflow-y: scroll;
 }
 
 .class-container {
@@ -20,5 +26,6 @@
 }
 
 .class-group {
-//    @TODO add proper padding for this; element too spaced apart
+    //padding-top: 0.1rem;
+    padding-bottom: 0.1rem;
 }

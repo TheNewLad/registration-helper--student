@@ -57,8 +57,8 @@ function loadClassPicker(data) {
     for (let group of groupSet) {
         classGroups +=
             `<div class="column is-12 class-group">
-                <button class="button button--class class-group__title">${group}</button>
-                <div class="columns is-multiline class-container">`;
+                <button class="button button--group class-group__title">${group}</button>
+                <div class="columns is-multiline class-container" style="display: none;">`;
         let inGroup = getClassesByGroup(group);
         for (let cls of inGroup) {
             let color = '';
@@ -86,6 +86,17 @@ function loadClassPicker(data) {
         $('.class-group-container').html(classGroups);
     }
 }
+
+// Toggle class visibility
+$('.class-group-container').on('click', '.button--group', event => {
+    $(event.currentTarget).next().slideToggle();
+});
+
+// Adds class to current semester editor
+$('.class-group-container').on('click', '.button--class', event => {
+    let className = $(event.currentTarget).text();
+    console.log(findClass(className));
+});
 
 /*Helper functions*/
 
