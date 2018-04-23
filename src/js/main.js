@@ -51,6 +51,42 @@ function createGroupSet(data) {
     return Promise.resolve(data);
 }
 
+// Loads up class picker using data from API
+function loadClassPicker(data) {
+    let classGroups = '';
+    for (let group of groupSet) {
+        classGroups +=
+            `<div class="column is-12 class-group">
+                <button class="button button--class class-group__title">${group}</button>
+                <div class="columns is-multiline class-container">`;
+        let inGroup = getClassesByGroup(group);
+        for (let cls of inGroup) {
+            let color = '';
+            switch (isCompleted(cls)) {
+            case 3:
+                color = 'link';
+                break;
+            case 2:
+                color = 'success';
+                break;
+            case 1:
+            case 0:
+                color = 'danger';
+                break;
+            }
+
+            classGroups +=
+                `<div class="column column--button is-12">
+                    <button class="button button--class is-outlined is-${color}">${cls.class}</button>
+                </div>`;
+        }
+        classGroups +=
+                `</div>
+            </div>`
+        $('.class-group-container').html(classGroups);
+    }
+}
+
 /*Helper functions*/
 
 // Searches for classes with year/term code and returns them
@@ -111,11 +147,21 @@ function isCompleted(classObj) {
 
 // Check class prerequisites for completion
 function isPrerequisiteComplete(prereqArray) {
+    // Turns prereqArray into an array if it isn't one
+    // @TODO fix bug
+    if (!Array.isArray(prereqArray)){
+        prereqArray = Array.from(prereqArray);
+    }
     return prereqArray.every(isPrerequisiteGroupComplete);
 }
 
 // Check class prerequisites for partial completion
 function isPrerequisitePartiallyComplete(prereqArray) {
+    // Turns prereqArray into an array if it isn't one
+    // @TODO fix bug
+    if (!Array.isArray(prereqArray)){
+        prereqArray = Array.from(prereqArray);
+    }
     return prereqArray.some(isPrerequisiteGroupComplete);
 }
 
@@ -213,5 +259,6 @@ function getTermLetter(termName) {
     getAllClassesStudent(ucid, studentMajor)
         .then(setAllClassesStudent)
         .then(createClassSet)
-        .then(createGroupSet);
+        .then(createGroupSet)
+        .then(loadClassPicker);
 })();
