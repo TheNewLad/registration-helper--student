@@ -159,7 +159,7 @@ function isCompleted(classObj) {
 // Check class prerequisites for completion
 function isPrerequisiteComplete(prereqArray) {
     // Turns prereqArray into an array if it isn't one
-    // @TODO fix bug
+    // @TODO fix bug where prereq is an array
     if (!Array.isArray(prereqArray)){
         prereqArray = Array.from(prereqArray);
     }
@@ -169,7 +169,7 @@ function isPrerequisiteComplete(prereqArray) {
 // Check class prerequisites for partial completion
 function isPrerequisitePartiallyComplete(prereqArray) {
     // Turns prereqArray into an array if it isn't one
-    // @TODO fix bug
+    // @TODO fix bug where prereq isn't an array
     if (!Array.isArray(prereqArray)){
         prereqArray = Array.from(prereqArray);
     }
@@ -210,7 +210,7 @@ function findClass(className) {
             return classObj;
         }
     }
-    return -1;
+    return undefined;
 }
 
 // Checks if class is taken
