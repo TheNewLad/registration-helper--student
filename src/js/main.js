@@ -6,10 +6,17 @@ const APP_ROOT = 'http://clubs.njit.edu/capstone/RegistrationHelper';
 let allClassesStudent;
 const classSet = new Set();
 const groupSet = new Set();
+let currentSemester = {term: 'Spring', year: 2018};
+let previousSemester = {term: 'Spring', year: 2018};
 
 // @TODO Remove Hardcoded parameters
 let ucid = 'mgt23';
 let studentMajor = 'Science1';
+
+// Fill in javascript variables
+$('.js-major__name').text(studentMajor);
+$('.js-year').text(currentSemester.year);
+$('.js-term').text(currentSemester.term);
 
 // Gets all Classes for student
 function getAllClassesStudent(ucid, major) {
@@ -52,7 +59,7 @@ function createGroupSet(data) {
 }
 
 // Loads up class picker using data from API
-function loadClassPicker(data) {
+function loadClassPicker() {
     let classGroups = '';
     for (let group of groupSet) {
         classGroups +=
@@ -85,7 +92,7 @@ function loadClassPicker(data) {
         }
         classGroups +=
                 `</div>
-            </div>`
+            </div>`;
         $('.class-group-container').html(classGroups);
     }
 }
@@ -108,7 +115,7 @@ function loadSemesters(data) {
         for (let t = 0; t <= 1; t++) { // t: term
             let term = t === 0 ? 'Spring' : 'Fall';
             semesters +=
-                `<div class="column is-one-quarter">
+                `<div class="column is-one-quarter semester-container" data-year="${year}" data-term="${term}">
                     <div class="box">
                         <div class="semester">
                             <p class="semester__title">${year} ${term}</p>
@@ -136,9 +143,22 @@ function loadSemesters(data) {
 
         }
     }
-    $('.js-semester').html(semesters);
+    $('.js-planner').html(semesters);
     return Promise.resolve(data);
 }
+
+// Selects semester for editing
+$('.js-planner').on('click', '.semester-container', event => {
+    let selectedSemester = $(event.currentTarget).data();
+    console.log(selectedSemester);
+    console.log(compareSemesters(previousSemester, selectedSemester));
+    if (compareSemesters(previousSemester, selectedSemester) === -1) {
+        previousSemester = currentSemester;
+        currentSemester = selectedSemester;
+    }
+    $('.js-year').text(currentSemester.year);
+    $('.js-term').text(currentSemester.term);
+});
 
 /*Helper functions*/
 
@@ -309,6 +329,16 @@ function getTermLetter(termName) {
         break;
     }
     return term;
+}
+
+// Compares semesters for sorting
+function compareSemesters(a, b) {
+    if (a.year !== b.year) {
+        return a.year < b.year ? -1 : 1;
+    } else if (a.year === b.year && a.term !== b.term) {
+        return a.term === 'Spring' ? -1 : 1;
+    }
+    return 0;
 }
 
 // Loads app after page load
