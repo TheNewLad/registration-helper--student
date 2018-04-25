@@ -33,8 +33,10 @@
         </nav>
         <section class="section">
             <div class="columns">
-                <div class="column is-one-third curriculum">
-                    <div class="semester-form">
+                <div class="column is-one-quarter curriculum">
+                    <p class="major"><span class="has-text-weight-bold">Major: </span><span class="major__name js-major__name"></span></p>
+                    <!--@TODO Remove semester form if not needed-->
+                    <div class="semester-form is-hidden">
                         <div class="field">
                             <label class="label">Semester Year</label>
                             <div class="control">
@@ -70,6 +72,7 @@
                 </div>
                 <div class="column planning">
                     plan
+                    <div class="columns is-multiline js-semester"></div>
                 </div>
             </div>
         </section>

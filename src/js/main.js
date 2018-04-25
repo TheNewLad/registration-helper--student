@@ -77,7 +77,10 @@ function loadClassPicker(data) {
 
             classGroups +=
                 `<div class="column column--button is-12">
-                    <button class="button button--class is-outlined is-${color}">${cls.class}</button>
+                    <div class="buttons has-addons button--class">
+                        <span class="button button--class__name is-outlined is-${color}">${cls.class}</span>
+                        <span class="button is-info"><i class="fas fa-info-circle"></i></span>
+                    </div>
                 </div>`;
         }
         classGroups +=
@@ -93,18 +96,61 @@ $('.class-group-container').on('click', '.button--group', event => {
 });
 
 // Adds class to current semester editor
-$('.class-group-container').on('click', '.button--class', event => {
+$('.class-group-container').on('click', '.button--class__name', event => {
     let className = $(event.currentTarget).text();
     console.log(findClass(className));
 });
+
+// Load semesters with classes
+function loadSemesters(data) {
+    let semesters = '';
+    for (let year = 2018; year <= 2023; year++) { // y: year
+        for (let t = 0; t <= 1; t++) { // t: term
+            let term = t === 0 ? 'Spring' : 'Fall';
+            semesters +=
+                `<div class="column is-one-quarter">
+                    <div class="box">
+                        <div class="semester">
+                            <p class="semester__title">${year} ${term}</p>
+                            <div class="semester__class-container">
+                                <div class="columns is-multiline class-container">
+                                    <div class="column column--button is-12">`;
+
+            let classArr = getClassesByCode({'year': year, 'term': term});
+            for (let cls of classArr) {
+                semesters +=
+                                        `<div class="buttons has-addons">
+                                            <span class="button button--class__name">${cls.class}</span>
+                                            <span class="button is-info"><i class="fas fa-info-circle"></i></span>
+                                        </div>`;
+            }
+
+            semesters +=
+                                    `</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+
+
+        }
+    }
+    $('.js-semester').html(semesters);
+    return Promise.resolve(data);
+}
 
 /*Helper functions*/
 
 // Searches for classes with year/term code and returns them
 function getClassesByCode(code) {
+    let semCode = code;
+    if (typeof semCode === 'object') {
+        semCode = objectToCode(semCode);
+    }
     let classArr = [];
     for (let cls of allClassesStudent) {
-        if (cls.code === code) {
+        if (cls.code === semCode) {
             classArr.push(cls);
         }
     }
@@ -219,7 +265,7 @@ function isTaken(classObj) {
 }
 
 // decodes class code
-function codeDecode(code) {
+function codeToObject(code) {
     if (code.length > 5) {
         throw new Error(`Check code: ${code} Invalid`);
     }
@@ -230,7 +276,7 @@ function codeDecode(code) {
 }
 
 // encodes class code
-function codeEncode(codeObj) {
+function objectToCode(codeObj) {
     let code = '';
     code += codeObj.year;
     code += getTermLetter(codeObj.term);
@@ -266,10 +312,11 @@ function getTermLetter(termName) {
 }
 
 // Loads app after page load
-(function loadApp(){
+function loadApp(){
     getAllClassesStudent(ucid, studentMajor)
         .then(setAllClassesStudent)
         .then(createClassSet)
         .then(createGroupSet)
-        .then(loadClassPicker);
-})();
+        .then(loadClassPicker)
+        .then(loadSemesters);
+}loadApp();
