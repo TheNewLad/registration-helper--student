@@ -18,6 +18,11 @@ $('.js-major__name').text(studentMajor);
 $('.js-year').text(currentSemester.year);
 $('.js-term').text(currentSemester.term);
 
+// Closes modal
+$('.modal-close').on('click', () => {
+    $('.modal').removeClass('is-active');
+});
+
 // Gets all Classes for student
 function getAllClassesStudent(ucid, major) {
     return new Promise( resolve => {
@@ -86,7 +91,7 @@ function loadClassPicker() {
                 `<div class="column column--button is-12">
                     <div class="buttons has-addons button--class">
                         <span class="button button--class__name is-outlined is-${color}">${cls.class}</span>
-                        <span class="button is-info"><i class="fas fa-info-circle"></i></span>
+                        <span class="button is-info class-info" data-class="${cls.class}"><i class="fas fa-info-circle"></i></span>
                     </div>
                 </div>`;
         }
@@ -108,6 +113,23 @@ $('.class-group-container').on('click', '.button--class__name', event => {
     console.log(findClass(className));
 });
 
+// Loads class info when button is clicked
+$('body').on('click', '.class-info', event => {
+    let className = $(event.currentTarget).data().class;
+    let classObj = findClass(className);
+
+    // Set modal class info
+    $('.js-modal__class').text(classObj.class);
+    $('.js-modal__description').text(classObj.description);
+    $('.js-modal__semester').text(() => {
+        return classObj.code ? classObj.code : 'N/A';
+    });
+    $('.js-modal__prerequisite-list').html(prerequisitesToHTML(classObj.prereqs));
+
+    // Opens modal
+    $('.modal').addClass('is-active');
+});
+
 // Load semesters with classes
 function loadSemesters(data) {
     let semesters = '';
@@ -115,7 +137,7 @@ function loadSemesters(data) {
         for (let t = 0; t <= 1; t++) { // t: term
             let term = t === 0 ? 'Spring' : 'Fall';
             semesters +=
-                `<div class="column is-one-quarter semester-container" data-year="${year}" data-term="${term}">
+                `<div class="column is-one-quarter semester-container">
                     <div class="box">
                         <div class="semester">
                             <p class="semester__title">${year} ${term}</p>
@@ -128,7 +150,7 @@ function loadSemesters(data) {
                 semesters +=
                                         `<div class="buttons has-addons">
                                             <span class="button button--class__name">${cls.class}</span>
-                                            <span class="button is-info"><i class="fas fa-info-circle"></i></span>
+                                            <span class="button is-info class-info" data-class="${cls.class}"><i class="fas fa-info-circle"></i></span>
                                         </div>`;
             }
 
@@ -137,6 +159,7 @@ function loadSemesters(data) {
                                 </div>
                             </div>
                         </div>
+                        <button class="button is-danger edit-button"  data-year="${year}" data-term="${term}">Edit</button>
                     </div>
                 </div>`;
 
@@ -148,7 +171,7 @@ function loadSemesters(data) {
 }
 
 // Selects semester for editing
-$('.js-planner').on('click', '.semester-container', event => {
+$('.js-planner').on('click', '.edit-button', event => {
     let selectedSemester = $(event.currentTarget).data();
     console.log(selectedSemester);
     console.log(compareSemesters(previousSemester, selectedSemester));
@@ -161,6 +184,37 @@ $('.js-planner').on('click', '.semester-container', event => {
 });
 
 /*Helper functions*/
+
+// Returns an HTML list representation of class prerequisites
+function prerequisitesToHTML(prereqs) {
+    let html = '';
+    for (let prereq of prereqs) {
+        if (prereq.logic === 'OR') {
+            html += '<li class="prerequisite-item">Take One: [';
+            for (let course of prereq.course) {
+                if (isTaken(course)) {
+                    html += `<span class="has-text-link is-italic">${course.prereq}</span>`;
+                } else {
+                    html += `${course.prereq}`;
+                }
+                html += ', ';
+            }
+            html += ']</li>';
+        } else if (prereq.logic === 'AND') {
+            html += '<li class="prerequisite-item">Take All: [';
+            for (let course of prereq.course) {
+                if (isTaken(course)) {
+                    html += `<span class="has-text-link is-italic">${course.prereq}</span>`;
+                } else {
+                    html += `${course.prereq}`;
+                }
+                html += ', ';
+            }
+            html += ']</li>';
+        }
+    }
+    return html;
+}
 
 // Searches for classes with year/term code and returns them
 function getClassesByCode(code) {
