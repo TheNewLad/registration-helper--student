@@ -6,8 +6,8 @@ const APP_ROOT = 'http://clubs.njit.edu/capstone/RegistrationHelper';
 let allClassesStudent;
 const classSet = new Set();
 const groupSet = new Set();
-let currentSemester = {term: 'Spring', year: 2018};
-let previousSemester = {term: 'Spring', year: 2018};
+let currentSemester = {}; //{term: 'Spring', year: 2018};
+let previousSemester = {}; //{term: 'Spring', year: 2018};
 
 // @TODO Remove Hardcoded parameters
 let ucid = 'mgt23';
@@ -15,13 +15,11 @@ let studentMajor = 'Science1';
 
 // Fill in javascript variables
 $('.js-major__name').text(studentMajor);
-$('.js-year').text(currentSemester.year);
-$('.js-term').text(currentSemester.term);
 
-// Closes modal
-$('.modal-close').on('click', () => {
-    $('.modal').removeClass('is-active');
-});
+// @TODO Remove next 2 lines if not needed
+// $('.js-year').text(currentSemester.year);
+// $('.js-term').text(currentSemester.term);
+
 
 // Gets all Classes for student
 function getAllClassesStudent(ucid, major) {
@@ -73,19 +71,7 @@ function loadClassPicker() {
                 <div class="columns is-multiline class-container" style="display: none;">`;
         let inGroup = getClassesByGroup(group);
         for (let cls of inGroup) {
-            let color = '';
-            switch (isCompleted(cls)) {
-            case 3:
-                color = 'link';
-                break;
-            case 2:
-                color = 'success';
-                break;
-            case 1:
-            case 0:
-                color = 'danger';
-                break;
-            }
+            let color = getClassColor(cls);
 
             classGroups +=
                 `<div class="column column--button is-12">
@@ -107,11 +93,42 @@ $('.class-group-container').on('click', '.button--group', event => {
     $(event.currentTarget).next().slideToggle();
 });
 
-// Adds class to current semester editor
+// Checks class to be added to current semester editor
 $('.class-group-container').on('click', '.button--class__name', event => {
     let className = $(event.currentTarget).text();
-    console.log(findClass(className));
+    if (isCompleted(findClass(className)) === 3) {
+        $('.modal--class-message .modal-content')
+            .html(generateClassMessageModal('warning', className));
+        $('.modal--class-message')
+            .addClass('is-active');
+    } else if (isCompleted(findClass(className)) === 2) {
+        addClassToSemester(className);
+    } else if (isCompleted(findClass(className)) < 2) {
+        $('.modal--class-message .modal-content')
+            .html(generateClassMessageModal('error'));
+        $('.modal--class-message')
+            .addClass('is-active');
+    }
 });
+
+// Adds class to selected semester
+function addClassToSemester(className) {
+    if ($.isEmptyObject(currentSemester)) {
+        $('.modal--class-message .modal-content')
+            .html(generateClassMessageModal('error--class'));
+        $('.modal--class-message')
+            .addClass('is-active');
+    } else {
+        $(`.js-${objectToCode(currentSemester)}`).append( () => {
+            return `<div class="buttons has-addons">
+                                            <span class="button button--class__name is-outlined is-${getClassColor(className)}">${className}</span>
+                                            <span class="button is-info class-info" data-class="${className}"><i class="fas fa-info-circle"></i></span>
+                                        </div>`;
+        });
+        $('.modal--class-message')
+            .removeClass('is-active');
+    }
+}
 
 // Loads class info when button is clicked
 $('body').on('click', '.class-info', event => {
@@ -127,13 +144,18 @@ $('body').on('click', '.class-info', event => {
     $('.js-modal__prerequisite-list').html(prerequisitesToHTML(classObj.prereqs));
 
     // Opens modal
-    $('.modal').addClass('is-active');
+    $('.modal--class-info').addClass('is-active');
+});
+
+// Closes modal
+$('.modal-close').on('click', () => {
+    $('.modal--class-info, .modal--class-message').removeClass('is-active');
 });
 
 // Load semesters with classes
 function loadSemesters(data) {
     let semesters = '';
-    for (let year = 2018; year <= 2023; year++) { // y: year
+    for (let year = 2018; year <= 2021; year++) { // y: year
         for (let t = 0; t <= 1; t++) { // t: term
             let term = t === 0 ? 'Spring' : 'Fall';
             semesters +=
@@ -143,13 +165,13 @@ function loadSemesters(data) {
                             <p class="semester__title">${year} ${term}</p>
                             <div class="semester__class-container">
                                 <div class="columns is-multiline class-container">
-                                    <div class="column column--button is-12">`;
+                                    <div class="column column--button is-12 js-${objectToCode({year: year, term: term})}">`;
 
             let classArr = getClassesByCode({'year': year, 'term': term});
             for (let cls of classArr) {
                 semesters +=
                                         `<div class="buttons has-addons">
-                                            <span class="button button--class__name">${cls.class}</span>
+                                            <span class="button button--class__name is-outlined is-${getClassColor(cls.class)}">${cls.class}</span>
                                             <span class="button is-info class-info" data-class="${cls.class}"><i class="fas fa-info-circle"></i></span>
                                         </div>`;
             }
@@ -173,12 +195,13 @@ function loadSemesters(data) {
 // Selects semester for editing
 $('.js-planner').on('click', '.edit-button', event => {
     let selectedSemester = $(event.currentTarget).data();
-    console.log(selectedSemester);
-    console.log(compareSemesters(previousSemester, selectedSemester));
     if (compareSemesters(previousSemester, selectedSemester) === -1) {
         previousSemester = currentSemester;
         currentSemester = selectedSemester;
     }
+    $('.semester-container .box').removeClass('box--selected');
+    $(event.currentTarget).parent('.box').addClass('box--selected');
+
     $('.js-year').text(currentSemester.year);
     $('.js-term').text(currentSemester.term);
 });
@@ -193,7 +216,7 @@ function prerequisitesToHTML(prereqs) {
             html += '<li class="prerequisite-item">Take One: [';
             for (let course of prereq.course) {
                 if (isTaken(course)) {
-                    html += `<span class="has-text-link is-italic">${course.prereq}</span>`;
+                    html += `<span class="has-text-link has-text-weight-semibold is-italic">${course.prereq}</span>`;
                 } else {
                     html += `${course.prereq}`;
                 }
@@ -204,7 +227,7 @@ function prerequisitesToHTML(prereqs) {
             html += '<li class="prerequisite-item">Take All: [';
             for (let course of prereq.course) {
                 if (isTaken(course)) {
-                    html += `<span class="has-text-link is-italic">${course.prereq}</span>`;
+                    html += `<span class="has-text-link has-text-weight-semibold is-italic">${course.prereq}</span>`;
                 } else {
                     html += `${course.prereq}`;
                 }
@@ -248,6 +271,19 @@ function getClassesByGroup(group) {
 // Group Exist
 function isGroup(className) {
     return groupSet.has(className);
+}
+
+// Determine class color
+function getClassColor(className) {
+    switch (isCompleted(className)) {
+    case 3:
+        return 'link';
+    case 2:
+        return 'success';
+    case 1:
+    case 0:
+        return 'danger';
+    }
 }
 
 /*
@@ -320,7 +356,7 @@ function isClass(className) {
     return classSet.has(className);
 }
 
-// Find class from array of classes
+// Find class in array of classes
 function findClass(className) {
     if (!isClass(className)) {
         throw new Error(`Could not find class: ${className}`);
@@ -333,9 +369,27 @@ function findClass(className) {
     return undefined;
 }
 
+// Find class index in array of classes
+function findClassIndex(className) {
+    if (!isClass(className)) {
+        throw new Error(`Could not find class: ${className}`);
+    }
+    for (let i = 0; i < allClassesStudent.length; i++) {
+        if (allClassesStudent[i].class === className) {
+            return i;
+        }
+    }
+    return -1;
+}
+
 // Checks if class is taken
 function isTaken(classObj) {
-    return classObj.code !== null;
+    if (typeof classObj === 'object') {
+        return classObj.code !== null;
+    } else {
+        return findClass(classObj).code !== null;
+    }
+
 }
 
 // decodes class code
@@ -387,12 +441,61 @@ function getTermLetter(termName) {
 
 // Compares semesters for sorting
 function compareSemesters(a, b) {
-    if (a.year !== b.year) {
+    if ($.isEmptyObject(a) && $.isEmptyObject(b)) {
+        return 0;
+    } else if ($.isEmptyObject(a) && !$.isEmptyObject(b)) {
+        return -1;
+    } else if (!$.isEmptyObject(a) && $.isEmptyObject(b)) {
+        return 1;
+    } else if (a.year !== b.year) {
         return a.year < b.year ? -1 : 1;
     } else if (a.year === b.year && a.term !== b.term) {
         return a.term === 'Spring' ? -1 : 1;
     }
     return 0;
+}
+
+function generateClassMessageModal(messageType, className = '') {
+    let html = '';
+
+    switch (messageType) {
+    case 'error':
+        html = `<article class="message is-danger">
+                <div class="message-header">
+                    <p>Error!</p>
+                    <button class="delete is-hidden" aria-label="delete"></button>
+                </div>
+                <div class="message-body">
+                    You do not have the require prerequisites to take this class. If you have a permit to take this class, or an override for a prerequisite, please add the respective class to the Override <em>Semester</em>.
+                </div>
+            </article>`;
+        break;
+    case 'error--class':
+        html = `<article class="message is-danger">
+            <div class="message-header">
+                <p>Error!</p>
+                <button class="delete is-hidden" aria-label="delete"></button>
+            </div>
+            <div class="message-body">
+                No semester chosen.
+            </div>
+        </article>`;
+        break;
+    case 'warning':
+        html = `<article class="message is-warning">
+                <div class="message-header">
+                    <p>Warning!</p>
+                    <button class="delete is-hidden" aria-label="delete"></button>
+                </div>
+                <div class="message-body">
+                    You have taken this class before. If this wasn't a mistake click <em>Continue</em>, otherwise close this dialogue.
+                    <p><button class="button" onclick="addClassToSemester('${className}')">Continue</button></p>
+                </div>
+            </article>`;
+        break;
+    }
+
+    return html;
 }
 
 // Loads app after page load
@@ -404,3 +507,7 @@ function loadApp(){
         .then(loadClassPicker)
         .then(loadSemesters);
 }loadApp();
+
+/* @TODO Known Bugs
+* + Semester selection border moves even when you can't edit that semester
+* */
