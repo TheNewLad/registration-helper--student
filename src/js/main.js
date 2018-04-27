@@ -104,10 +104,15 @@ $('.class-group-container').on('click', '.button--class__name', event => {
     } else if (isCompleted(findClass(className)) === 2) {
         addClassToSemester(className);
     } else if (isCompleted(findClass(className)) < 2) {
-        $('.modal--class-message .modal-content')
-            .html(generateClassMessageModal('error'));
-        $('.modal--class-message')
-            .addClass('is-active');
+        if (objectToCode(currentSemester) !== '9999F') {
+            $('.modal--class-message .modal-content')
+                .html(generateClassMessageModal('error'));
+            $('.modal--class-message')
+                .addClass('is-active');
+        } else {
+            addClassToSemester(className);
+        }
+
     }
 });
 
@@ -123,6 +128,7 @@ function addClassToSemester(className) {
             return `<div class="buttons has-addons">
                                             <span class="button button--class__name is-outlined is-${getClassColor(className)}">${className}</span>
                                             <span class="button is-info class-info" data-class="${className}"><i class="fas fa-info-circle"></i></span>
+                                            <span class="button button--delete-class is-danger"><i class="fas fa-trash"></i></span>
                                         </div>`;
         });
         $('.modal--class-message')
@@ -139,7 +145,12 @@ $('body').on('click', '.class-info', event => {
     $('.js-modal__class').text(classObj.class);
     $('.js-modal__description').text(classObj.description);
     $('.js-modal__semester').text(() => {
-        return classObj.code ? classObj.code : 'N/A';
+        if (classObj.code === '9999F') {
+            return 'Overridden';
+        } else {
+            return classObj.code ? classObj.code : 'N/A';
+        }
+
     });
     $('.js-modal__prerequisite-list').html(prerequisitesToHTML(classObj.prereqs));
 
@@ -160,7 +171,7 @@ function loadSemesters(data) {
             let term = t === 0 ? 'Spring' : 'Fall';
             semesters +=
                 `<div class="column is-one-quarter semester-container">
-                    <div class="box">
+                    <div class="box box--semester">
                         <div class="semester">
                             <p class="semester__title">${year} ${term}</p>
                             <div class="semester__class-container">
@@ -181,7 +192,15 @@ function loadSemesters(data) {
                                 </div>
                             </div>
                         </div>
-                        <button class="button is-danger edit-button"  data-year="${year}" data-term="${term}">Edit</button>
+                        <div class="buttons buttons-semester buttons--edit">
+                            <span class="button is-success edit-button"  data-year="${year}" data-term="${term}">Edit</span>
+                            
+</div>
+                        <div class="buttons buttons-semester  buttons--clear-submit is-hidden">
+                            <span class="button is-danger clear-button"  data-year="${year}" data-term="${term}">Clear</span>
+                            <span class="button is-info submit-button"  data-year="${year}" data-term="${term}">Submit</span>                            
+</div>
+                        
                     </div>
                 </div>`;
 
@@ -189,11 +208,22 @@ function loadSemesters(data) {
         }
     }
     $('.js-planner').html(semesters);
+
+    semesters = '';
+    let classArr = getClassesByCode({'year': 9999, 'term': 'Fall'});
+    for (let cls of classArr) {
+        semesters +=
+            `<div class="buttons has-addons">
+                                            <span class="button button--class__name is-outlined is-${getClassColor(cls.class)}">${cls.class}</span>
+                                            <span class="button is-info class-info" data-class="${cls.class}"><i class="fas fa-info-circle"></i></span>
+                                        </div>`;
+    }
+    $('.js-9999F').html(semesters);
     return Promise.resolve(data);
 }
 
 // Selects semester for editing
-$('.js-planner').on('click', '.edit-button', event => {
+$('.js-planner, .override').on('click', '.edit-button', event => {
     let selectedSemester = $(event.currentTarget).data();
     if (compareSemesters(previousSemester, selectedSemester) === -1) {
         previousSemester = currentSemester;
@@ -202,9 +232,93 @@ $('.js-planner').on('click', '.edit-button', event => {
     $('.semester-container .box').removeClass('box--selected');
     $(event.currentTarget).parent('.box').addClass('box--selected');
 
-    $('.js-year').text(currentSemester.year);
-    $('.js-term').text(currentSemester.term);
+    let arrX = [];
+    $(`.js-${objectToCode(selectedSemester)} .button--class__name`)
+        .each(function() {
+            let cls = $(this).text();
+            arrX.push({
+                name: cls,
+                ucid: ucid,
+                major: studentMajor
+            });
+        });
+    $.post(
+        `${APP_ROOT}/revertStudentRecords--karim.php`,
+        {
+            'x': arrX
+        },
+        data => {
+            if (data.success) {
+                $(event.currentTarget)
+                    .parent()
+                    .addClass('is-hidden')
+                    .siblings('.buttons--clear-submit')
+                    .removeClass('is-hidden');
+            }
+        }
+    );
+    if (objectToCode(currentSemester) === '9999F') {
+        $('.js-year').text('Override');
+    } else {
+        $('.js-year').text(currentSemester.year);
+        $('.js-term').text(currentSemester.term);
+    }
+
+    $(`.js-${objectToCode(selectedSemester)} .buttons.has-addons`)
+        .append('<span class="button button--delete-class is-danger"><i class="fas fa-trash"></i></span>');
 });
+
+// Clears semester in editing
+$('.js-planner, .override').on('click', '.clear-button', () => {
+
+    $(`.js-${objectToCode(currentSemester)}`)
+        .empty();
+});
+
+
+//Submits semester in editing
+$('.js-planner, .override').on('click', '.submit-button', event => {
+    let arrX = [];
+    $(`.js-${objectToCode(currentSemester)} .button--class__name`)
+        .each(function() {
+            let cls = $(this).text();
+            arrX.push({
+                name: cls,
+                code: objectToCode(currentSemester),
+                ucid: ucid,
+                major: studentMajor
+            });
+        });
+    $.post(
+        `${APP_ROOT}/updateStudentRecords--karim.php`,
+        {
+            'x': arrX
+        },
+        data => {
+            if (data.success) {
+                $(event.currentTarget)
+                    .parent()
+                    .addClass('is-hidden')
+                    .siblings('.buttons--edit')
+                    .removeClass('is-hidden');
+                currentSemester = {};
+                $('.js-year').empty();
+                $('.js-term').empty();
+            }
+        }
+    );
+    $(`.js-${objectToCode(currentSemester)} .button--delete-class`).remove();
+    loadApp();
+
+});
+
+// Delete button to remove class
+$('.js-planner, .override').on('click', '.button--delete-class', event => {
+    $(event.currentTarget)
+        .parent()
+        .remove();
+});
+
 
 /*Helper functions*/
 
@@ -455,6 +569,7 @@ function compareSemesters(a, b) {
     return 0;
 }
 
+// Generates Error/Warning Message
 function generateClassMessageModal(messageType, className = '') {
     let html = '';
 
@@ -510,4 +625,5 @@ function loadApp(){
 
 /* @TODO Known Bugs
 * + Semester selection border moves even when you can't edit that semester
+* + Can edit multiple without submitting current semester
 * */

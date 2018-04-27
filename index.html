@@ -33,7 +33,7 @@
         </nav>
         <section class="section section--helper">
             <div class="columns">
-                <div class="column is-one-quarter curriculum">
+                <div class="column is-2 curriculum">
                     <p class="major"><span class="has-text-weight-bold">Major: </span><span class="major__name js-major__name"></span></p>
                     <!--@TODO Remove semester form if not needed-->
                     <div class="semester-form is-hidden">
@@ -70,9 +70,31 @@
 
                     </div>
                 </div>
-                <div class="column planning">
+                <div class="column is-8 planning">
                     <p><span class="has-text-weight-bold">Currently Editing: </span><span class="js-year"></span> <span class="js-term"></span></p>
                     <div class="columns is-multiline js-planner"></div>
+                </div>
+                <div class="column is-2 override">
+                    <div class="column semester-container">
+                        <div class="box box--semester">
+                            <div class="semester">
+                                <p class="semester__title">Override</p>
+                                <div class="semester__class-container">
+                                    <div class="columns is-multiline class-container">
+                                        <div class="column column--button is-12 js-9999F"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="buttons buttons-semester buttons--edit">
+                                <span class="button is-success edit-button" data-year="9999" data-term="Fall">Edit</span>
+
+                            </div>
+                            <div class="buttons buttons-semester  buttons--clear-submit is-hidden">
+                                <span class="button is-danger clear-button" data-year="9999" data-term="Fall">Clear</span>
+                                <span class="button is-info submit-button" data-year="9999" data-term="Fall">Submit</span>
+                            </div>
+
+                        </div>
                 </div>
             </div>
         </section>
