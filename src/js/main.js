@@ -410,24 +410,30 @@ function isCompleted(classObj) {
         if (isPrerequisiteComplete(prereqs)) {
             return 3;
         } else {
-            $.post(
-                `${APP_ROOT}/revertStudentRecords--karim.php`,
-                {
-                    x: [
-                        {
-                            name: cls.class,
-                            ucid: ucid,
-                            major: studentMajor
+            if (cls.code !== '9999F') {
+                $.post(
+                    `${APP_ROOT}/revertStudentRecords--karim.php`,
+                    {
+                        x: [
+                            {
+                                name: cls.class,
+                                ucid: ucid,
+                                major: studentMajor
+                            }
+                        ]
+                    },
+                    data => {
+                        if (data.success) {
+                            loadApp();
                         }
-                    ]
-                },
-                data => {
-                    if (data.success) {
-                        loadApp();
                     }
-                }
-            );
-            return 0;
+                );
+                return 0;
+            } else {
+                return 3;
+            }
+
+
         }
     } else if (prereqs === undefined
         || prereqs.length === 0) {
