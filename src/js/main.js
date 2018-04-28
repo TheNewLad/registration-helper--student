@@ -12,6 +12,7 @@ let previousSemester = {}; //{term: 'Spring', year: 2018};
 // @TODO Remove Hardcoded parameters
 let ucid = 'mgt23';
 let studentMajor = 'Science1';
+let password = '';
 
 // Fill in javascript variables
 $('.js-major__name').text(studentMajor);
@@ -613,6 +614,34 @@ function generateClassMessageModal(messageType, className = '') {
     return html;
 }
 
+// Assigns variables that will be used to load app
+function assignVariables() {
+    ucid = $('.js-login__ucid').val();
+    password = $('.js-login__password').val();
+    studentMajor = $('.js-login__select option:selected').val();
+    loadApp();
+}
+
+// Gets majors to select from
+function getMajors() {
+    $.getJSON(
+        `${APP_ROOT}/getAllMajors.php`,
+        data => {
+            let majorHTML = '';
+            for (let major of data) {
+                majorHTML += `<option>${major}</option>`;
+            }
+            $('.js-login__select').html(majorHTML);
+        }
+    );
+} getMajors();
+
+// Displays App after load
+function unhideApp() {
+    $('.login').addClass('is-hidden');
+    $('.section--helper').removeClass('is-hidden');
+}
+
 // Loads app after page load
 function loadApp(){
     getAllClassesStudent(ucid, studentMajor)
@@ -620,8 +649,9 @@ function loadApp(){
         .then(createClassSet)
         .then(createGroupSet)
         .then(loadClassPicker)
-        .then(loadSemesters);
-}loadApp();
+        .then(loadSemesters)
+        .then(unhideApp);
+}
 
 /* @TODO Known Bugs
 * + Semester selection border moves even when you can't edit that semester

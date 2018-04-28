@@ -31,7 +31,36 @@
                 </a>
             </div>
         </nav>
-        <section class="section section--helper">
+        <div class="login">
+            <p class="login__message">Please Login</p>
+            <div class="field">
+                <label class="label">UCID</label>
+                <div class="control">
+                    <input class="input js-login__ucid" type="text" placeholder="">
+                </div>
+            </div>
+            <div class="field">
+                <label class="label">Password</label>
+                <div class="control">
+                    <input class="input js-login__password" type="password" placeholder="">
+                </div>
+            </div>
+            <div class="field">
+                <label class="label">Subject</label>
+                <div class="control">
+                    <div class="select">
+                        <select class="js-login__select"></select>
+                    </div>
+                </div>
+            </div>
+            <div class="field">
+                <div class="control">
+                    <button class="button is-link" onclick="assignVariables()">Submit</button>
+                </div>
+            </div>
+        </div>
+
+        <section class="section section--helper is-hidden">
             <div class="columns">
                 <div class="column is-2 curriculum">
                     <p class="major"><span class="has-text-weight-bold">Major: </span><span class="major__name js-major__name"></span></p>
