@@ -404,9 +404,31 @@ function getClassColor(className) {
 *   3: course taken
 */
 function isCompleted(classObj) {
-    const prereqs = classObj.prereqs;
-    if (isTaken(classObj)) {
-        return 3;
+    const cls = typeof classObj === 'object' ? classObj : findClass(classObj);
+    const prereqs = cls.prereqs;
+    if (isTaken(classObj) && (prereqs !== undefined)) {
+        if (isPrerequisiteComplete(prereqs)) {
+            return 3;
+        } else {
+            $.post(
+                `${APP_ROOT}/revertStudentRecords--karim.php`,
+                {
+                    x: [
+                        {
+                            name: cls.class,
+                            ucid: ucid,
+                            major: studentMajor
+                        }
+                    ]
+                },
+                data => {
+                    if (data.success) {
+                        loadApp();
+                    }
+                }
+            );
+            return 0;
+        }
     } else if (prereqs === undefined
         || prereqs.length === 0) {
         return 2;
@@ -425,7 +447,10 @@ function isCompleted(classObj) {
 function isPrerequisiteComplete(prereqArray) {
     // Turns prereqArray into an array if it isn't one
     // @TODO fix bug where prereq is an array
-    if (!Array.isArray(prereqArray)){
+    if (Array.isArray(prereqArray) || prereqArray.length === 0 || prereqArray === undefined) {
+        return prereqArray.every(isPrerequisiteGroupComplete);
+    }
+    else if (!Array.isArray(prereqArray)){
         prereqArray = Array.from(prereqArray);
     }
     return prereqArray.every(isPrerequisiteGroupComplete);
