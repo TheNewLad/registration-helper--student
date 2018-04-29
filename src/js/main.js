@@ -607,7 +607,7 @@ function generateClassMessageModal(messageType, className = '') {
                     <button class="delete is-hidden" aria-label="delete"></button>
                 </div>
                 <div class="message-body">
-                    You do not have the require prerequisites to take this class. If you have a permit to take this class, or an override for a prerequisite, please add the respective class to the Override <em>Semester</em>.
+                    You do not have the required prerequisites to take this class. If you have a permit to take this class, or an override for a prerequisite, please add the respective class to the Override <em>Semester</em>.
                 </div>
             </article>`;
         break;
