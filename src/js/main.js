@@ -159,7 +159,7 @@ $('body').on('click', '.class-info', event => {
 });
 
 // Closes modal
-$('.modal-close').on('click', () => {
+$('.modal-close, .modal-background').on('click', () => {
     $('.modal--class-info, .modal--class-message').removeClass('is-active');
 });
 

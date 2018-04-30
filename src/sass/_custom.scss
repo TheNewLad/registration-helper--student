@@ -14,6 +14,7 @@
 
 .button--class {
     margin-bottom: 0 !important;
+    flex-wrap: nowrap;
 }
 
 .button--class__name {
@@ -78,6 +79,9 @@
 
 .override {
     margin-top: 1.5rem;
+    .box {
+        background-color: papayawhip;
+    }
 }
 
 .login {
