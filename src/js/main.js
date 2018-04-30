@@ -227,7 +227,7 @@ $('.js-planner, .override').on('click', '.edit-button', event => {
         currentSemester = selectedSemester;
     }
     $('.semester-container .box').removeClass('box--selected');
-    $(event.currentTarget).parent('.box').addClass('box--selected');
+    $(event.currentTarget).parents('.box--semester').addClass('box--selected');
 
     let arrX = [];
     $(`.js-${objectToCode(selectedSemester)} .button--class__name`)
@@ -301,6 +301,8 @@ $('.js-planner, .override').on('click', '.submit-button', event => {
                     .addClass('is-hidden')
                     .siblings('.buttons--edit')
                     .removeClass('is-hidden');
+                $('.semester-container .box')
+                    .removeClass('box--selected');
                 currentSemester = {};
                 $('.js-year').empty();
                 $('.js-term').empty();
