@@ -249,6 +249,8 @@ $('.js-planner, .override').on('click', '.edit-button', event => {
                     .addClass('is-hidden')
                     .siblings('.buttons--clear-submit')
                     .removeClass('is-hidden');
+                $('.edit-button').addClass('is-hidden');
+                reloadClassPicker();
             }
         }
     );
@@ -299,11 +301,12 @@ $('.js-planner, .override').on('click', '.submit-button', event => {
                 currentSemester = {};
                 $('.js-year').empty();
                 $('.js-term').empty();
+                $('.edit-button').removeClass('is-hidden');
             }
         }
     );
     $(`.js-${objectToCode(currentSemester)} .button--delete-class`).remove();
-    loadApp();
+    reloadApp();
 
 });
 
@@ -424,7 +427,7 @@ function isCompleted(classObj) {
                     },
                     data => {
                         if (data.success) {
-                            loadApp();
+                            reloadApp();
                         }
                     }
                 );
@@ -644,7 +647,7 @@ function assignVariables() {
     ucid = $('.js-login__ucid').val();
     password = $('.js-login__password').val();
     studentMajor = $('.js-login__select option:selected').val();
-    loadApp();
+    loadApp(); reloadApp();
 }
 
 // Gets majors to select from
@@ -676,6 +679,23 @@ function loadApp(){
         .then(loadClassPicker)
         .then(loadSemesters)
         .then(unhideApp);
+}
+
+function reloadApp() {
+    getAllClassesStudent(ucid, studentMajor)
+        .then(setAllClassesStudent)
+        .then(createClassSet)
+        .then(createGroupSet)
+        .then(loadClassPicker)
+        .then(loadSemesters);
+}
+
+function reloadClassPicker() {
+    getAllClassesStudent(ucid, studentMajor)
+        .then(setAllClassesStudent)
+        .then(createClassSet)
+        .then(createGroupSet)
+        .then(loadClassPicker);
 }
 
 /* @TODO Known Bugs
