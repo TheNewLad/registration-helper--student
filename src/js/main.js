@@ -264,7 +264,7 @@ $('.js-planner, .override').on('click', '.edit-button', event => {
     }
 
     $(`.js-${objectToCode(selectedSemester)} .buttons.has-addons`)
-        .append('<span class="button button--delete-class is-danger"><i class="fas fa-trash"></i></span>');
+        .append('<span class="button is-small button--delete-class is-danger"><i class="fas fa-trash"></i></span>');
 });
 
 // Clears semester in editing
@@ -278,6 +278,7 @@ $('.js-planner, .override').on('click', '.clear-button', () => {
 //Submits semester in editing
 $('.js-planner, .override').on('click', '.submit-button', event => {
     editMode = false;
+    $(event.currentTarget).addClass('is-loading');
     let arrX = [];
     $(`.js-${objectToCode(currentSemester)} .button--class__name`)
         .each(function() {
@@ -311,7 +312,8 @@ $('.js-planner, .override').on('click', '.submit-button', event => {
         }
     );
     $(`.js-${objectToCode(currentSemester)} .button--delete-class`).remove();
-    reloadApp();
+
+    setTimeout(reloadApp, 1000);
 
 });
 
@@ -328,6 +330,11 @@ $('.js-planner, .override').on('click', '.button--delete-class', event => {
 // Returns an HTML list representation of class prerequisites
 function prerequisitesToHTML(prereqs) {
     let html = '';
+    // Turns prereqArray into an array if it isn't one
+    // @TODO fix bug where prereq isn't an array
+    if (!Array.isArray(prereqs)){
+        prereqs = Array.from(prereqs);
+    }
     for (let prereq of prereqs) {
         if (prereq.logic === 'OR') {
             html += '<li class="prerequisite-item">Take One: [';
