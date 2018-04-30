@@ -8,13 +8,14 @@
     height: calc(100% - 3.25rem);
 }
 
-.button--class, .button--group {
+.button--group {
     width: 100%;
 }
 
 .button--class {
     margin-bottom: 0 !important;
     flex-wrap: nowrap;
+    width: 90%;
 }
 
 .button--class__name {

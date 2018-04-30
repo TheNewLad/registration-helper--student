@@ -77,8 +77,8 @@ function loadClassPicker() {
 
             classGroups +=
                 `<div class="buttons has-addons button--class">
-                    <span class="button button--class__name is-outlined is-${color}">${cls.class}</span>
-                    <span class="button is-info class-info" data-class="${cls.class}"><i class="fas fa-info-circle"></i></span>
+                    <span class="button is-small button--class__name is-outlined is-${color}">${cls.class}</span>
+                    <span class="button is-small is-info class-info" data-class="${cls.class}"><i class="fas fa-info-circle"></i></span>
                 </div>`;
         }
         classGroups +=
@@ -126,9 +126,9 @@ function addClassToSemester(className) {
     } else {
         $(`.js-${objectToCode(currentSemester)}`).append( () => {
             return `<div class="buttons has-addons button--class">
-                                            <span class="button button--class__name is-outlined is-${getClassColor(className)}">${className}</span>
-                                            <span class="button is-info class-info" data-class="${className}"><i class="fas fa-info-circle"></i></span>
-                                            <span class="button button--delete-class is-danger"><i class="fas fa-trash"></i></span>
+                                            <span class="button is-small button--class__name is-outlined is-${getClassColor(className)}">${className}</span>
+                                            <span class="button is-small is-info class-info" data-class="${className}"><i class="fas fa-info-circle"></i></span>
+                                            <span class="button is-small button--delete-class is-danger"><i class="fas fa-trash"></i></span>
                                         </div>`;
         });
         $('.modal--class-message')
@@ -180,8 +180,8 @@ function loadSemesters(data) {
             for (let cls of classArr) {
                 semesters +=
                                         `<div class="buttons has-addons button--class">
-                                            <span class="button button--class__name is-outlined is-${getClassColor(cls.class)}">${cls.class}</span>
-                                            <span class="button is-info class-info" data-class="${cls.class}"><i class="fas fa-info-circle"></i></span>
+                                            <span class="button is-small button--class__name is-outlined is-${getClassColor(cls.class)}">${cls.class}</span>
+                                            <span class="button is-small is-info class-info" data-class="${cls.class}"><i class="fas fa-info-circle"></i></span>
                                         </div>`;
             }
 
@@ -210,8 +210,8 @@ function loadSemesters(data) {
     for (let cls of classArr) {
         semesters +=
             `<div class="buttons has-addons">
-                                            <span class="button button--class__name is-outlined is-${getClassColor(cls.class)}">${cls.class}</span>
-                                            <span class="button is-info class-info" data-class="${cls.class}"><i class="fas fa-info-circle"></i></span>
+                                            <span class="button is-small button--class__name is-outlined is-${getClassColor(cls.class)}">${cls.class}</span>
+                                            <span class="button is-small is-info class-info" data-class="${cls.class}"><i class="fas fa-info-circle"></i></span>
                                         </div>`;
     }
     $('.js-9999F').html(semesters);
