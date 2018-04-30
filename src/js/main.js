@@ -278,7 +278,7 @@ $('.js-planner, .override').on('click', '.clear-button', () => {
 //Submits semester in editing
 $('.js-planner, .override').on('click', '.submit-button', event => {
     editMode = false;
-    $(event.currentTarget).addClass('is-loading');
+    $('.submit-button').addClass('is-loading');
     let arrX = [];
     $(`.js-${objectToCode(currentSemester)} .button--class__name`)
         .each(function() {
@@ -312,8 +312,8 @@ $('.js-planner, .override').on('click', '.submit-button', event => {
         }
     );
     $(`.js-${objectToCode(currentSemester)} .button--delete-class`).remove();
-
-    setTimeout(reloadApp, 1000);
+    $('.submit-button').removeClass('is-loading');
+    setTimeout(reloadApp, 500);
 
 });
 
