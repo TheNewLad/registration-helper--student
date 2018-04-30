@@ -8,6 +8,7 @@ const classSet = new Set();
 const groupSet = new Set();
 let currentSemester = {}; //{term: 'Spring', year: 2018};
 let previousSemester = {}; //{term: 'Spring', year: 2018};
+let editMode = false;
 
 // @TODO Remove Hardcoded parameters
 let ucid = 'mgt23';
@@ -219,6 +220,7 @@ function loadSemesters(data) {
 
 // Selects semester for editing
 $('.js-planner, .override').on('click', '.edit-button', event => {
+    editMode = true;
     let selectedSemester = $(event.currentTarget).data();
     if (compareSemesters(previousSemester, selectedSemester) === -1) {
         previousSemester = currentSemester;
@@ -275,6 +277,7 @@ $('.js-planner, .override').on('click', '.clear-button', () => {
 
 //Submits semester in editing
 $('.js-planner, .override').on('click', '.submit-button', event => {
+    editMode = false;
     let arrX = [];
     $(`.js-${objectToCode(currentSemester)} .button--class__name`)
         .each(function() {
@@ -413,24 +416,8 @@ function isCompleted(classObj) {
         if (isPrerequisiteComplete(prereqs)) {
             return 3;
         } else {
-            if (cls.code !== '9999F') {
-                $.post(
-                    `${APP_ROOT}/revertStudentRecords--karim.php`,
-                    {
-                        x: [
-                            {
-                                name: cls.class,
-                                ucid: ucid,
-                                major: studentMajor
-                            }
-                        ]
-                    },
-                    data => {
-                        if (data.success) {
-                            reloadApp();
-                        }
-                    }
-                );
+            if (cls.code !== '9999F' && !editMode) {
+                revertOneClass(cls.class);
                 return 0;
             } else {
                 return 3;
@@ -648,6 +635,27 @@ function assignVariables() {
     password = $('.js-login__password').val();
     studentMajor = $('.js-login__select option:selected').val();
     loadApp(); reloadApp();
+}
+
+// Reverts one class to null
+function revertOneClass(className) {
+    $.post(
+        `${APP_ROOT}/revertStudentRecords--karim.php`,
+        {
+            x: [
+                {
+                    name: className,
+                    ucid: ucid,
+                    major: studentMajor
+                }
+            ]
+        },
+        data => {
+            if (data.success) {
+                reloadApp();
+            }
+        }
+    );
 }
 
 // Gets majors to select from
