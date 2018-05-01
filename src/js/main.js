@@ -1,4 +1,4 @@
-/*global $, jQuery, alert*/
+/*global $, alert*/
 
 
 // global variables
@@ -22,6 +22,10 @@ $('.js-major__name').text(studentMajor);
 // $('.js-year').text(currentSemester.year);
 // $('.js-term').text(currentSemester.term);
 
+// Closes message guide
+$('.message--guide .delete').on('click', () => {
+    $('.message--guide').addClass('is-hidden');
+});
 
 // Gets all Classes for student
 function getAllClassesStudent(ucid, major) {
@@ -104,29 +108,49 @@ $('.class-group-container').on('click', '.button--class__name', event => {
     } else if (isCompleted(findClass(className)) === 2) {
         addClassToSemester(className);
     } else if (isCompleted(findClass(className)) < 2) {
-        if (objectToCode(currentSemester) !== '9999F') {
-            $('.modal--class-message .modal-content')
-                .html(generateClassMessageModal('error'));
-            $('.modal--class-message')
-                .addClass('is-active');
-        } else {
-            addClassToSemester(className);
-        }
+        $('.modal--class-message .modal-content')
+            .html(generateClassMessageModal('error', className));
+        $('.modal--class-message')
+            .addClass('is-active');
 
     }
 });
 
 // Adds class to selected semester
 function addClassToSemester(className) {
-    if ($.isEmptyObject(currentSemester)) {
+    if ($.isEmptyObject(currentSemester) || objectToCode(currentSemester) === '9999F0') {
         $('.modal--class-message .modal-content')
             .html(generateClassMessageModal('error--class'));
         $('.modal--class-message')
             .addClass('is-active');
     } else {
         $(`.js-${objectToCode(currentSemester)}`).append( () => {
+            let year = currentSemester.year;
+            let term = currentSemester.term;
             return `<div class="buttons has-addons button--class">
-                                            <span class="button is-small button--class__name is-outlined is-${getClassColor(className)}">${className}</span>
+                                            <span class="button is-small button--class__name is-outlined is-${getClassColor(className)}" data-year="${year}" data-term="${term}" data-overridden="0">${className}</span>
+                                            <span class="button is-small is-info class-info" data-class="${className}"><i class="fas fa-info-circle"></i></span>
+                                            <span class="button is-small button--delete-class is-danger"><i class="fas fa-trash"></i></span>
+                                        </div>`;
+        });
+        $('.modal--class-message')
+            .removeClass('is-active');
+    }
+}
+
+// Adds class to selected semester
+function addClassToOverride(className) {
+    if ($.isEmptyObject(currentSemester)) {
+        $('.modal--class-message .modal-content')
+            .html(generateClassMessageModal('error--class'));
+        $('.modal--class-message')
+            .addClass('is-active');
+    } else {
+        $(`.js-9999F0, .js-${objectToCode(currentSemester)}`).append( () => {
+            let year = currentSemester.year;
+            let term = currentSemester.term;
+            return `<div class="buttons has-addons button--class">
+                                            <span class="button is-small button--class__name is-outlined is-${getClassColor(className)}" data-year="${year}" data-term="${term}" data-overridden="1">${className}</span>
                                             <span class="button is-small is-info class-info" data-class="${className}"><i class="fas fa-info-circle"></i></span>
                                             <span class="button is-small button--delete-class is-danger"><i class="fas fa-trash"></i></span>
                                         </div>`;
@@ -145,12 +169,7 @@ $('body').on('click', '.class-info', event => {
     $('.js-modal__class').text(classObj.class);
     $('.js-modal__description').text(classObj.description);
     $('.js-modal__semester').text(() => {
-        if (classObj.code === '9999F') {
-            return 'Overridden';
-        } else {
-            return classObj.code ? classObj.code : 'N/A';
-        }
-
+        return codeToString(classObj.code);
     });
     $('.js-modal__prerequisite-list').html(prerequisitesToHTML(classObj.prereqs));
 
@@ -173,14 +192,18 @@ function loadSemesters(data) {
                 `<div class="column is-one-quarter semester-container">
                     <div class="box box--semester">
                         <div class="semester">
-                            <p class="semester__title">${year} ${term}</p>
+                            <p class="semester__title">${term} ${year}</p>
                                     <div class="column column--button is-12 js-${objectToCode({year: year, term: term})}">`;
 
-            let classArr = getClassesByCode({'year': year, 'term': term});
+            let classArr = getClassesByCode(year + term.substring(0,1));
             for (let cls of classArr) {
+                let codeObj = codeToObject(cls.code);
+                let year = codeObj.year;
+                let term = codeObj.term;
+                let override = codeObj.overridden;
                 semesters +=
                                         `<div class="buttons has-addons button--class">
-                                            <span class="button is-small button--class__name is-outlined is-${getClassColor(cls.class)}">${cls.class}</span>
+                                            <span class="button is-small button--class__name is-outlined is-${getClassColor(cls.class)}" data-year="${year}" data-term="${term}" data-overridden="${override}">${cls.class}</span>
                                             <span class="button is-small is-info class-info" data-class="${cls.class}"><i class="fas fa-info-circle"></i></span>
                                         </div>`;
             }
@@ -189,12 +212,12 @@ function loadSemesters(data) {
                                     `</div>
                         </div>
                         <div class="buttons buttons-semester buttons--edit">
-                            <span class="button is-success edit-button"  data-year="${year}" data-term="${term}">Edit</span>
+                            <span class="button is-small is-success edit-button"  data-year="${year}" data-term="${term}">Edit</span>
                             
 </div>
                         <div class="buttons buttons-semester  buttons--clear-submit is-hidden">
-                            <span class="button is-danger clear-button"  data-year="${year}" data-term="${term}">Clear</span>
-                            <span class="button is-info submit-button"  data-year="${year}" data-term="${term}">Submit</span>                            
+                            <span class="button is-small is-danger clear-button"  data-year="${year}" data-term="${term}">Clear</span>
+                            <span class="button is-small is-info submit-button"  data-year="${year}" data-term="${term}">Submit</span>                            
 </div>
                         
                     </div>
@@ -206,15 +229,19 @@ function loadSemesters(data) {
     $('.js-planner').html(semesters);
 
     semesters = '';
-    let classArr = getClassesByCode({'year': 9999, 'term': 'Fall'});
+    let classArr = getOverriddenClasses();
     for (let cls of classArr) {
+        let codeObj = codeToObject(cls.code);
+        let year = codeObj.year;
+        let term = codeObj.term;
+        let override = codeObj.overridden;
         semesters +=
-            `<div class="buttons has-addons">
-                                            <span class="button is-small button--class__name is-outlined is-${getClassColor(cls.class)}">${cls.class}</span>
+            `<div class="buttons button--class has-addons">
+                                            <span class="button is-small button--class__name is-outlined is-${getClassColor(cls.class)}" data-year="${year}" data-term="${term}" data-overridden="${override}">${cls.class}</span>
                                             <span class="button is-small is-info class-info" data-class="${cls.class}"><i class="fas fa-info-circle"></i></span>
                                         </div>`;
     }
-    $('.js-9999F').html(semesters);
+    $('.js-9999F0').html(semesters);
     return Promise.resolve(data);
 }
 
@@ -256,7 +283,7 @@ $('.js-planner, .override').on('click', '.edit-button', event => {
             }
         }
     );
-    if (objectToCode(currentSemester) === '9999F') {
+    if (objectToCode(currentSemester) === '9999F0') {
         $('.js-year').text('Override');
     } else {
         $('.js-year').text(currentSemester.year);
@@ -285,10 +312,12 @@ $('.js-planner, .override').on('click', '.submit-button', event => {
             let cls = $(this).text();
             arrX.push({
                 name: cls,
-                code: objectToCode(currentSemester),
+                code: objectToCode($(this).data()),
                 ucid: ucid,
                 major: studentMajor
             });
+            // TODO Remove if not needed
+            // console.log(objectToCode($(this).data()));
         });
     $.post(
         `${APP_ROOT}/updateStudentRecords--karim.php`,
@@ -365,13 +394,36 @@ function prerequisitesToHTML(prereqs) {
 
 // Searches for classes with year/term code and returns them
 function getClassesByCode(code) {
+    let semObj = code;
+    if (typeof semObj === 'string') {
+        semObj = codeToObject(semObj);
+    }
+    let year = semObj.year;
+    let term = semObj.term;
+    let classArr = [];
+    for (let cls of allClassesStudent) {
+        if (cls.code === null) {
+            continue;
+        }
+        let clsObj = codeToObject(cls.code);
+        let y = clsObj.year;
+        let t = clsObj.term;
+        if (t === term && y === year) {
+            classArr.push(cls);
+        }
+    }
+    return classArr;
+}
+
+// Searches for classes with year/term code and returns them
+function getOverriddenClasses(code) {
     let semCode = code;
     if (typeof semCode === 'object') {
         semCode = objectToCode(semCode);
     }
     let classArr = [];
     for (let cls of allClassesStudent) {
-        if (cls.code === semCode) {
+        if (isOverridden(cls.code)) {
             classArr.push(cls);
         }
     }
@@ -396,6 +448,8 @@ function getClassesByGroup(group) {
 function isGroup(className) {
     return groupSet.has(className);
 }
+
+
 
 // Determine class color
 function getClassColor(className) {
@@ -425,7 +479,7 @@ function isCompleted(classObj) {
         if (isPrerequisiteComplete(prereqs)) {
             return 3;
         } else {
-            if (cls.code !== '9999F' && !editMode) {
+            if (!isOverridden(cls.code) && !editMode) {
                 revertOneClass(cls.class);
                 return 0;
             } else {
@@ -533,12 +587,13 @@ function isTaken(classObj) {
 
 // decodes class code
 function codeToObject(code) {
-    if (code.length > 5) {
+    if (code.length > 6) {
         throw new Error(`Check code: ${code} Invalid`);
     }
     let obj = {};
     obj.year = code.substring(0,4);
-    obj.term = getTermName(code.substring(4));
+    obj.term = getTermName(code.substring(4,5));
+    obj.overridden = Number(code.substring(5));
     return obj;
 }
 
@@ -547,7 +602,37 @@ function objectToCode(codeObj) {
     let code = '';
     code += codeObj.year;
     code += getTermLetter(codeObj.term);
+    code += codeObj.overridden === undefined ? 0 : codeObj.overridden;
     return code;
+}
+
+// Returns semester code as a legible string
+function codeToString(code) {
+    let str ='';
+
+
+    if (code === null) {
+        return 'N/A';
+    } else if (isOverridden(code)) {
+        let codeObj = codeToObject(code);
+        str = `${codeObj.term} ${codeObj.year}; Overridden`;
+    } else {
+        let codeObj = codeToObject(code);
+        str = `${codeObj.term} ${codeObj.year}`;
+    }
+
+    return str;
+}
+
+// Checks if class is overridden
+function isOverridden(code) {
+    if (code === null ) {
+        return false;
+    }
+    if (typeof code === 'string') {
+        code = codeToObject(code);
+    }
+    return code.overridden === 1;
 }
 
 // Gets term name from letter
@@ -606,7 +691,9 @@ function generateClassMessageModal(messageType, className = '') {
                     <button class="delete is-hidden" aria-label="delete"></button>
                 </div>
                 <div class="message-body">
-                    You do not have the required prerequisites to take this class. If you have a permit to take this class, or an override for a prerequisite, please add the respective class to the Override <em>Semester</em>.
+                    You do not have the required prerequisites to take this class. If you have a permit to take this class, please add the respective class to the Override by clicking <em>Add to Override</em>, otherwise close this dialogue.
+                    <p><button class="button" onclick="addClassToOverride('${className}')">Add to Override</button></p>
+                    <div><ul class="prerequisite-list js-modal__prerequisite-list">${prerequisitesToHTML(findClass(className).prereqs)}</ul></div>
                 </div>
             </article>`;
         break;

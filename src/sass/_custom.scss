@@ -1,7 +1,9 @@
 /* ==========================================================================
    Author's custom styles
    ========================================================================== */
-
+html {
+    overflow: hidden;
+}
 
 .section--helper {
     padding: 0.5rem 1.5rem;
@@ -24,9 +26,9 @@
 
 .class-picker {
     margin-top: 1rem;
-    height: 100%;
-    max-height: 75%;
-    padding-bottom: 2rem;
+    height: 77%;
+    max-height: 108vh;
+    padding-bottom: 0;
 
     & .box {
         height: 80%;
@@ -36,7 +38,7 @@
 .class-group-container {
     max-height: 100%;
     overflow: hidden;
-    overflow-y: scroll;
+    overflow-y: auto;
 }
 
 .class-container {
@@ -44,15 +46,15 @@
     height: 20vh;
     max-height: 20vh;
     overflow: hidden;
-    overflow-y: scroll;
+    overflow-y: auto;
     padding-left: 1.25em;
 }
 
 .column--button {
-    height: 20vh;
-    max-height: 20vh;
+    height: 25vh;
+    max-height: 25vh;
     overflow: hidden;
-    overflow-y: scroll;
+    overflow-y: auto;
 }
 
 .class-group {
@@ -65,8 +67,10 @@
 }
 
 .buttons-semester {
-    margin-top: 2rem;
+    //margin-top: 2rem;
     margin-bottom: 0 !important;
+    //position: relative;
+    //top: 4vh;
 }
 
 .box--selected {
@@ -74,7 +78,7 @@
 }
 
 .box--semester {
-    height: 40vh;
+    height: 39vh;
     padding-bottom: 0.75rem;
 }
 
@@ -88,4 +92,20 @@
 .login {
     width: 20%;
     padding: 2rem;
+}
+
+.message--guide {
+    position: fixed;
+    width: 300px;
+    bottom: 0;
+    right: 0;
+}
+
+//.curriculum,
+//.planning,
+.override {
+    max-height: 78vh;
+}
+.curriculum {
+    max-height: 80vh;
 }
