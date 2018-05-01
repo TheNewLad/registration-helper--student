@@ -771,7 +771,8 @@ function getMajors() {
 // Displays App after load
 function unhideApp() {
     $('.login').addClass('is-hidden');
-    $('.section--helper').removeClass('is-hidden');
+    $('.section--helper, .greeting').removeClass('is-hidden');
+    $('.js-ucid').text(ucid);
     $('.modal--guide').addClass('is-active');
 }
 
