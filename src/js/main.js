@@ -179,7 +179,7 @@ $('body').on('click', '.class-info', event => {
 
 // Closes modal
 $('.modal-close, .modal-background').on('click', () => {
-    $('.modal--class-info, .modal--class-message').removeClass('is-active');
+    $('.modal--class-info, .modal--class-message, .modal--guide').removeClass('is-active');
 });
 
 // Load semesters with classes
@@ -772,6 +772,7 @@ function getMajors() {
 function unhideApp() {
     $('.login').addClass('is-hidden');
     $('.section--helper').removeClass('is-hidden');
+    $('.modal--guide').addClass('is-active');
 }
 
 // Loads app after page load
