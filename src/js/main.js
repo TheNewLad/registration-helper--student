@@ -771,8 +771,24 @@ function getMajors() {
 // Displays App after load
 function unhideApp() {
     $('.login').addClass('is-hidden');
-    $('.section--helper').removeClass('is-hidden');
+    $('.section--helper, .greeting').removeClass('is-hidden');
+    $('.js-ucid').text(ucid);
     $('.modal--guide').addClass('is-active');
+}
+
+// Fixes prereqs
+function fixPrerequisites(data) {
+    for (let i = 0; i < allClassesStudent.length; i++){
+        if (!Array.isArray(allClassesStudent[i].prereqs)) {
+            let newPrereq = [];
+            let prereqs = allClassesStudent[i].prereqs;
+            for (let obj in prereqs) {
+                newPrereq.push(prereqs[obj]);
+            }
+            allClassesStudent[i].prereqs = newPrereq;
+        }
+    }
+    return Promise.resolve(data);
 }
 
 // Loads app after page load
@@ -781,6 +797,7 @@ function loadApp(){
         .then(setAllClassesStudent)
         .then(createClassSet)
         .then(createGroupSet)
+        .then(fixPrerequisites)
         .then(loadClassPicker)
         .then(loadSemesters)
         .then(unhideApp);
@@ -791,6 +808,7 @@ function reloadApp() {
         .then(setAllClassesStudent)
         .then(createClassSet)
         .then(createGroupSet)
+        .then(fixPrerequisites)
         .then(loadClassPicker)
         .then(loadSemesters);
 }
@@ -800,6 +818,7 @@ function reloadClassPicker() {
         .then(setAllClassesStudent)
         .then(createClassSet)
         .then(createGroupSet)
+        .then(fixPrerequisites)
         .then(loadClassPicker);
 }
 
